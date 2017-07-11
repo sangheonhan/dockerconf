@@ -1,0 +1,29 @@
+web:
+    image: nginx:latest
+    ports:
+        - "80:80"
+    volumes:
+        - ./public:/public
+        - ./site.conf:/etc/nginx/conf.d/default.conf
+    links:
+        - php
+php:
+    build: .
+    dockerfile: Dockerfile
+    volumes:
+        - ./public:/public
+    links:
+        - mysql
+mysql:
+    image: mysql:latest
+    ports:
+        - "3306:3306"
+    environment:
+        MYSQL_ROOT_PASSWORD: test
+        MYSQL_USER: test
+        MYSQL_PASSWORD: test
+        MYSQL_DATABASE: test
+    volumes:
+        - ./mysql.cnf:/etc/mysql/mysql.conf.d/charset.cnf
+        - ./.docker/data/mysql/:/docker-entrypoint-initdb.d
+        - ./mysql-data:/var/lib/mysql
