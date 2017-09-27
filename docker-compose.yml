@@ -12,6 +12,7 @@ php:
     dockerfile: Dockerfile
     volumes:
         - ./project:/project
+        - ./php.ini:/usr/local/etc/php/php.ini
     links:
         - mysql
 mysql:
