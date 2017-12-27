@@ -10,6 +10,8 @@ web:
 php:
     build: .
     dockerfile: Dockerfile
+    ports:
+        - "9000:9000"
     volumes:
         - ./project:/project
         - ./php.ini:/usr/local/etc/php/php.ini

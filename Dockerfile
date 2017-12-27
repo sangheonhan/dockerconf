@@ -8,4 +8,7 @@ RUN mkdir -p /usr/src/php/ext/apcu\
 RUN docker-php-ext-configure apcu\
   && docker-php-ext-install apcu
 
+RUN pecl install xdebug\
+  && docker-php-ext-enable xdebug
+
 RUN rm -rd /usr/src/php/ext/apcu && rm /tmp/apcu.tar.gz

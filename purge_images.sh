@@ -1,3 +1,3 @@
 #! /bin/bash
 
-sudo docker rmi $(sudo docker images -q)
+docker rmi $(sudo docker images -q)
