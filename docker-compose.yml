@@ -40,13 +40,11 @@ services:
           - devnet
 
     redis:
-        image: 'bitnami/redis:latest'
-        environment:
-            - ALLOW_EMPTY_PASSWORD=yes
+        image: 'redis:latest'
         ports:
             - '6379:6379'
         volumes:
-            - ./redis:/bitnami
+            - ./redis:/data
         networks:
             - devnet
 
