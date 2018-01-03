@@ -1,4 +1,4 @@
-FROM php:7-fpm
+FROM php:7.1-fpm
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 ADD https://pecl.php.net/get/apcu-5.1.8.tgz /tmp/apcu.tar.gz
@@ -7,6 +7,10 @@ RUN mkdir -p /usr/src/php/ext/apcu\
 
 RUN docker-php-ext-configure apcu\
   && docker-php-ext-install apcu
+
+RUN pecl install -o -f redis \
+  && rm -rf /tmp/pear \
+  && docker-php-ext-enable redis
 
 RUN pecl install xdebug\
   && docker-php-ext-enable xdebug

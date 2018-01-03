@@ -1,32 +1,113 @@
-web:
-    image: nginx:latest
-    ports:
-        - "80:80"
-    volumes:
-        - ./project:/project
-        - ./site.conf:/etc/nginx/conf.d/default.conf
-    links:
-        - php
-php:
-    build: .
-    dockerfile: Dockerfile
-    ports:
-        - "9000:9000"
-    volumes:
-        - ./project:/project
-        - ./php.ini:/usr/local/etc/php/php.ini
-    links:
-        - mysql
-mysql:
-    image: mysql:latest
-    ports:
-        - "3306:3306"
-    environment:
-        MYSQL_ROOT_PASSWORD: test
-        MYSQL_USER: test
-        MYSQL_PASSWORD: test
-        MYSQL_DATABASE: test
-    volumes:
-        - ./mysql.cnf:/etc/mysql/mysql.conf.d/charset.cnf
-        - ./.docker/data/mysql/:/docker-entrypoint-initdb.d
-        - ./mysql:/var/lib/mysql
+version: "2"
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "80:80"
+        volumes:
+            - ./project:/project
+            - ./site.conf:/etc/nginx/conf.d/default.conf
+        networks:
+          - devnet
+    
+    php:
+        image: php:7.1-fpm
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "9000:9000"
+        volumes:
+            - ./project:/project
+            - ./php.ini:/usr/local/etc/php/php.ini
+        networks:
+          - devnet
+    
+    mysql:
+        image: mysql:latest
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: test
+            MYSQL_USER: test
+            MYSQL_PASSWORD: test
+            MYSQL_DATABASE: test
+        volumes:
+            - ./mysql.cnf:/etc/mysql/mysql.conf.d/charset.cnf
+            - ./.docker/data/mysql/:/docker-entrypoint-initdb.d
+            - ./mysql:/var/lib/mysql
+        networks:
+          - devnet
+
+    redis:
+        image: 'bitnami/redis:latest'
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
+        ports:
+            - '6379:6379'
+        volumes:
+            - ./redis:/bitnami
+        networks:
+            - devnet
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+        container_name: elasticsearch
+        environment:
+            - cluster.name=docker-cluster
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - esdata1:/usr/share/elasticsearch/data
+        ports:
+            - 9200:9200
+        networks:
+            - devnet
+
+    elasticsearch2:
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.1.1
+        container_name: elasticsearch2
+        environment:
+            - cluster.name=docker-cluster
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+            - "discovery.zen.ping.unicast.hosts=elasticsearch"
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        volumes:
+            - esdata2:/usr/share/elasticsearch/data
+        networks:
+            - devnet
+
+    mongodb:
+        image: mongo:latest
+        container_name: mongodb
+        environment:
+            - MONGO_DATA_DIR=/data/db
+            - MONGO_LOG_DIR=/dev/null
+        volumes:
+            - ./mongodb:/data/db
+        ports:
+            - 27017:27017
+        environment:
+            - AUTH=yes
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=admin
+        command: mongod --smallfiles --logpath=/dev/null # --quiet
+        networks:
+            - devnet
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+
+networks:
+  devnet:
