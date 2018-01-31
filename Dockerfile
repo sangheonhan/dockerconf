@@ -1,5 +1,5 @@
 FROM php:7.1-fpm
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN docker-php-ext-install mysqli pdo pdo_mysql bcmath
 
 ADD https://pecl.php.net/get/apcu-5.1.8.tgz /tmp/apcu.tar.gz
 RUN mkdir -p /usr/src/php/ext/apcu\
